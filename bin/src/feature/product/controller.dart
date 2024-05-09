@@ -3,21 +3,27 @@ import 'package:shelf_router/shelf_router.dart';
 import '../../data/database/service.dart';
 import 'service.dart';
 
-part 'controller.g.dart';
+part 'controller.g.dart'; // generated with 'pub run build_runner build'
 
-class UserController {
+class ProductController {
   final DatabaseService database;
-  final UserService service;
+  final ProductService service;
 
-  UserController(this.database) : service = UserService(database);
+  ProductController(this.database) : service = ProductService(database);
 
-  @Route.post('/login')
-  Future<Response> auth(Request request) async => service.auth(request);
+  @Route.post('/add')
+  Future<Response> add(Request request) async => service.add(request);
 
-  @Route.post('/register')
-  Future<Response> register(Request request) async => service.register(request);
+  @Route.post('/delete')
+  Future<Response> delete(Request request) async => service.delete(request);
 
-  Router get router => _$UserControllerRouter(this);
+  @Route.post('/get')
+  Future<Response> get(Request request) async => service.get(request);
 
-  Handler get handler => _$UserControllerRouter(this).call;
+  @Route.post('/getAll')
+  Future<Response> getAll(Request request) async => service.getAll(request);
+
+  Router get router => _$ProductControllerRouter(this);
+
+  Handler get handler => _$ProductControllerRouter(this).call;
 }

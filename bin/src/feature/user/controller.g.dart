@@ -6,27 +6,17 @@ part of 'controller.dart';
 // ShelfRouterGenerator
 // **************************************************************************
 
-Router _$ProductControllerRouter(ProductController service) {
+Router _$UserControllerRouter(UserController service) {
   final router = Router();
   router.add(
     'POST',
-    r'/add',
-    service.add,
+    r'/login',
+    service.login,
   );
   router.add(
     'POST',
-    r'/delete',
-    service.delete,
-  );
-  router.add(
-    'POST',
-    r'/get',
-    service.get,
-  );
-  router.add(
-    'POST',
-    r'/getAll',
-    service.getAll,
+    r'/register',
+    service.register,
   );
   return router;
 }

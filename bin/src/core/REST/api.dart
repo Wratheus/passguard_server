@@ -14,10 +14,10 @@ class Api {
 
 
 
-  @Route.mount('/api/auth')
+  @Route.mount('/api/user')
   Router get _users => UserController(database).router;
 
-  @Route.mount('/api/password')
+  @Route.mount('/api/product')
   Router get _products => ProductController(database).router;
 
   Router get router => _$ApiRouter(this);

@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:encrypt/encrypt.dart';
 
 import '../service.dart';
 import '../tables/products.dart';
@@ -27,12 +28,12 @@ class ProductDao extends DatabaseAccessor<DatabaseService> with _$ProductDaoMixi
 
   Future<int?> addPassword(
       {required int userId,
-        required String password,
+        required Encrypted password,
         String? url,
         String? description,
         String? name}) async {
     return db.call(() async => db.into(products).insert(ProductsCompanion(
-        password: Value(password),
+        password: Value(password.base64),
         name: Value(name),
         description: Value(description),
         url: Value(url),
