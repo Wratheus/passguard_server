@@ -1,8 +1,5 @@
 import 'dart:convert';
-
-import 'package:encrypt/encrypt.dart';
 import 'package:shelf/shelf.dart';
-
 import '../../core/utils/jwt_provider.dart';
 import '../../core/utils/response_template.dart';
 import '../../core/utils/rsa_provider.dart';
@@ -22,25 +19,20 @@ final class UserService with ResponseTemplates {
 
       final user = await database.userDao.getUserWithLogin(login);
 
-      final encodedPasswordString =
-          await RSAProvider.decode(Encrypted(base64.decode(password)));
+      final encodedPasswordString = await RSAProvider.encode(password);
 
-      if (user == null || user.password != encodedPasswordString) {
-        return Response.forbidden(
-          error(errorMessage: 'Неверный логин или пароль!'),
-        );
+      if (user == null || user.password != encodedPasswordString.base64) {
+        return Response.ok(mapToJson(message: 'Неверный логин или пароль!'));
       }
 
       final token = await JWTProvider.getJWT({'userId': user.userId});
 
-      return Response.ok(
-        ok({
-          'userId': user.userId,
-          'token': token,
-        }),
-      );
+      return Response.ok(mapToJson(
+        success: true,
+        data: {'userId': user.userId, 'token': token},
+      ));
     } catch (e) {
-      return Response.forbidden(error(errorMessage: e.toString()));
+      return Response.ok(mapToJson(message: e.toString()));
     }
   }
 
@@ -53,14 +45,14 @@ final class UserService with ResponseTemplates {
       final confirm = params['confirm'];
 
       if (password != confirm) {
-        return Response.forbidden(error(errorMessage: "Пароли не совпадают"));
+        return Response.ok(mapToJson(message: "Пароли не совпадают"));
       }
 
       final user = await database.userDao.getUserWithLogin(login);
 
       if (user != null) {
-        return Response.forbidden(
-            error(errorMessage: "Пользователь с таким логином уже существует"));
+        return Response.ok(
+            mapToJson(message: "Пользователь с таким логином уже существует"));
       }
 
       final newId =
@@ -69,17 +61,16 @@ final class UserService with ResponseTemplates {
       final token = await JWTProvider.getJWT({'userId': newId});
 
       final response = {
+        "success": true,
         'userId': newId,
         'token': token,
       };
 
-      final encodedData = ok(response);
+      print(response);
 
-      print(encodedData);
-
-      return Response.ok(encodedData);
+      return Response.ok(jsonEncode(response));
     } catch (e) {
-      return Response.forbidden(error(errorMessage: e.toString()));
+      return Response.ok(mapToJson(message: e.toString()));
     }
   }
 }

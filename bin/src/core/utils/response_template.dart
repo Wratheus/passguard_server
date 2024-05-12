@@ -1,23 +1,33 @@
 import 'dart:convert';
 
 mixin ResponseTemplates {
-  String ok(Map<String, dynamic> data) {
-    return _responseTemplate(data);
+  String mapToJson(
+      {Map<String, dynamic>? data, bool? success = false, String? message}) {
+    return _responseTemplate(data, success: success, message: message);
   }
 
-  String error({required String errorMessage}) {
-    return _responseTemplate(<String, dynamic>{}, errorMessage: errorMessage);
-  }
-
-  String _responseTemplate(Map<String, dynamic> data, {String? errorMessage}) {
-    final bool isErrorResponse = errorMessage != null;
+  String _responseTemplate(Map<String, dynamic>? data,
+      {bool? success, String? message}) {
+    List<Map> msgSnackInfo = [];
+    if (success == false) {
+      msgSnackInfo.add(
+        {"type": "error", "view": "toast", "text": message},
+      );
+    } else {
+      msgSnackInfo.add(
+        {
+          "type": "success",
+          "view": "toast",
+          "text": message,
+        },
+      );
+    }
 
     final Map<String, Object> response = <String, Object>{
-      'apiSuccess': !isErrorResponse,
-      if (isErrorResponse) 'error': errorMessage,
-      'data': data,
+      'success': success ?? false,
+      'message': msgSnackInfo,
+      'data': data ?? {},
     };
-
     return jsonEncode(response);
   }
 }

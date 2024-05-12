@@ -11,27 +11,28 @@ part 'product.g.dart';
     Products,
   ],
 )
-class ProductDao extends DatabaseAccessor<DatabaseService> with _$ProductDaoMixin {
+class ProductDao extends DatabaseAccessor<DatabaseService>
+    with _$ProductDaoMixin {
   ProductDao(super.db);
 
   Future<Product?> getPassword(int userId, int passwordId) async {
     return db.call(() async => await (db.select(products)
-      ..where(($ProductsTable tbl) => tbl.id.equals(passwordId)))
+          ..where(($ProductsTable tbl) => tbl.id.equals(passwordId)))
         .getSingleOrNull());
   }
 
   Future<List<Product>?> getAllPasswords(int userId) async {
     return db.call(() async => await (db.select(products)
-      ..where(($ProductsTable tbl) => tbl.userId.equals(userId)))
+          ..where(($ProductsTable tbl) => tbl.userId.equals(userId)))
         .get());
   }
 
   Future<int?> addPassword(
       {required int userId,
-        required Encrypted password,
-        String? url,
-        String? description,
-        String? name}) async {
+      required Encrypted password,
+      String? url,
+      String? description,
+      String? name}) async {
     return db.call(() async => db.into(products).insert(ProductsCompanion(
         password: Value(password.base64),
         name: Value(name),
@@ -44,9 +45,15 @@ class ProductDao extends DatabaseAccessor<DatabaseService> with _$ProductDaoMixi
     required int userId,
     required int passwordId,
   }) async {
-    return db.call(() async =>
-    await ((db.delete(products)..where(($ProductsTable tbl) => tbl.id.equals(passwordId)))
-      ..where(($ProductsTable tbl) => tbl.userId.equals(userId)))
-        .go());
+    return db.call(
+      () async => await ((db.delete(products)
+            ..where(
+              ($ProductsTable tbl) => tbl.id.equals(passwordId),
+            ))
+            ..where(
+              ($ProductsTable tbl) => tbl.userId.equals(userId),
+            ))
+          .go(),
+    );
   }
 }

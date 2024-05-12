@@ -20,7 +20,7 @@ final class ProductService with ResponseTemplates {
       final token = map['token'];
       final password = map['password'];
       if (password is! String) {
-        return Response.forbidden(error(errorMessage: 'password обязателен'));
+        return Response.ok(mapToJson(message: "Пароль обязателен"));
       }
       final name = map['name'];
       final url = map['url'];
@@ -29,8 +29,7 @@ final class ProductService with ResponseTemplates {
       final payload = await JWTProvider.verifyJWT(token);
 
       if (payload == null) {
-        return Response.forbidden(
-            error(errorMessage: 'Авторизация не пройдена'));
+        return Response.ok(mapToJson(message: "Авторизация не пройдена!"));
       }
 
       final encryptedPassword = await RSAProvider.encode(password);
@@ -42,9 +41,15 @@ final class ProductService with ResponseTemplates {
           description: description,
           name: name);
 
-      return Response.ok(ok({'id': passwordId}));
+      return Response.ok(
+        mapToJson(
+          data: {'id': passwordId},
+          message: "Пользователь успешно зарегестрирован",
+          success: true,
+        ),
+      );
     } catch (e) {
-      return Response.forbidden(error(errorMessage: e.toString()));
+      return Response.ok(mapToJson(message: e.toString()));
     }
   }
 
@@ -55,13 +60,16 @@ final class ProductService with ResponseTemplates {
       final token = map['token'];
       final id = map['id'];
       if (id == null) {
-        return Response.forbidden(error(errorMessage: 'id is required'));
+        return Response.ok(
+          mapToJson(
+            message: 'id is required',
+          ),
+        );
       }
       final payload = await JWTProvider.verifyJWT(token);
 
       if (payload == null) {
-        return Response.forbidden(
-            error(errorMessage: 'Авторизация не пройдена'));
+        return Response.ok(mapToJson(message: 'Авторизация не пройдена!'));
       }
 
       await database.productDao.deletePassword(
@@ -69,9 +77,11 @@ final class ProductService with ResponseTemplates {
         passwordId: int.parse(id),
       );
 
-      return Response.ok(ok({'result': true}));
+      return Response.ok(
+        mapToJson(message: "Пароль удален!", success: true),
+      );
     } catch (e) {
-      return Response.forbidden(error(errorMessage: e.toString()));
+      return Response.ok(mapToJson(message: e.toString()));
     }
   }
 
@@ -82,14 +92,13 @@ final class ProductService with ResponseTemplates {
       final token = map['token'];
       final passwordId = map['id'];
       if (passwordId is! int) {
-        return Response.forbidden(error(errorMessage: 'id обязателен'));
+        return Response.ok(mapToJson(message: 'id обязателен'));
       }
 
       final payload = await JWTProvider.verifyJWT(token);
 
       if (payload == null) {
-        return Response.forbidden(
-            error(errorMessage: 'Авторизация не пройдена'));
+        return Response.ok(mapToJson(message: 'Авторизация не пройдена'));
       }
 
       final userId = payload['userId'];
@@ -97,18 +106,17 @@ final class ProductService with ResponseTemplates {
       final product = await database.productDao.getPassword(userId, passwordId);
 
       if (product == null) {
-        return Response.forbidden(
-            error(errorMessage: 'Пароля с таким id не найдено'));
+        return Response.ok(mapToJson(message: 'Пароля с таким id не найдено'));
       }
 
       final dectyptedPassword =
           await RSAProvider.decode(Encrypted(base64.decode(product.password)));
 
-      return Response.ok(ok({
-        'password': product.copyWith(password: dectyptedPassword).toJson()
+      return Response.ok(mapToJson(success: true, data: {
+        "password": product.copyWith(password: dectyptedPassword).toJson()
       }));
     } catch (e) {
-      return Response.forbidden(error(errorMessage: e.toString()));
+      return Response.ok(mapToJson(message: e.toString()));
     }
   }
 
@@ -120,8 +128,7 @@ final class ProductService with ResponseTemplates {
       final payload = await JWTProvider.verifyJWT(token);
 
       if (payload == null) {
-        return Response.forbidden(
-            error(errorMessage: 'Авторизация не пройдена'));
+        return Response.ok(mapToJson(message: 'Авторизация не пройдена'));
       }
 
       final userId = payload['userId'];
@@ -129,7 +136,7 @@ final class ProductService with ResponseTemplates {
       final products = await database.productDao.getAllPasswords(userId);
 
       if (products == null) {
-        return Response.forbidden('Произошла неизвестная ошибка');
+        return Response.ok(mapToJson(message: 'Произошла неизвестная ошибка'));
       }
 
       var decryptedPasswords = [];
@@ -148,9 +155,16 @@ final class ProductService with ResponseTemplates {
             products[i].copyWith(password: decryptedPasswords[i]).toJson());
       }
 
-      return Response.ok(ok({'passwords': passwordsJsonList}));
+      return Response.ok(mapToJson(
+        success: true,
+        data: {"passwords": passwordsJsonList},
+      ));
     } catch (e) {
-      return Response.forbidden(error(errorMessage: e.toString()));
+      return Response.ok(
+        mapToJson(
+          message: e.toString(),
+        ),
+      );
     }
   }
 }

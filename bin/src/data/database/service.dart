@@ -26,7 +26,7 @@ final class DatabaseService extends _$DatabaseService {
   @override
   int get schemaVersion => 1;
 
-  static Future<Directory> get getDirectory async => Directory("/database");
+  static Future<Directory> get getDirectory async => Directory("database");
 
   static Future<File> get getDbFile async =>
       File("${(await getDirectory).path}/passguard.sqlite");
